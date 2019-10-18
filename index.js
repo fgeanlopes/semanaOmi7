@@ -18,6 +18,17 @@ server.use(express.json());
 });*/
 
 const users = ["Diego", "Mateus", "Gabriel"];
+
+server.use((req, res, next) => {
+  console.time("Request");
+
+  console.log(`Método: ${req.method}; URL: ${req.url}`);
+
+  next();
+
+  console.timeEnd("Request");
+});
+
 //Listagem de todos os usuário
 server.get("/users", (req, res) => {
   return res.json(users);
@@ -35,6 +46,25 @@ server.post("/users", (req, res) => {
 
   users.push(name);
   return res.json(users);
+});
+
+//*** EDITAR ***/
+server.put("/users/:index", (req, res) => {
+  const { index } = req.params;
+  const { name } = req.body;
+
+  users[index] = name;
+
+  return res.json(users);
+});
+
+//*** DELETE ***/
+server.delete("/users/:index", (req, res) => {
+  const { index } = req.params;
+
+  users.splice(index, 1);
+
+  return res.send();
 });
 
 //porta do servidor
