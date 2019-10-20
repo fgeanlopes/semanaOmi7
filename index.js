@@ -29,27 +29,47 @@ server.use((req, res, next) => {
   console.timeEnd("Request");
 });
 
+//middle
+
+function checkUserExits(req, res, next) {
+  if (!req.body.name) {
+    return res.status(400).json({ erro: "user name is requierd" });
+  }
+  return next();
+}
+
+function checkInArray(req, res, next) {
+  const user = users[req.params.index];
+  if (!user) {
+    return res.status(400).json({ error: "User does not exists" });
+  }
+  //pegando a variavel criada acima
+  req.user = user;
+
+  return next();
+}
+
 //Listagem de todos os usuário
 server.get("/users", (req, res) => {
   return res.json(users);
 });
 
 //Listagem de um usuário
-server.get("/users/:index", (req, res) => {
-  const { index } = req.params;
-  return res.json(users[index]);
+server.get("/users/:index", checkInArray, (req, res) => {
+  return res.json(req.user);
 });
 
 // *** REQUEST BODY ***
-server.post("/users", (req, res) => {
+server.post("/users", checkUserExits, (req, res) => {
   const { name } = req.body;
 
   users.push(name);
+
   return res.json(users);
 });
 
 //*** EDITAR ***/
-server.put("/users/:index", (req, res) => {
+server.put("/users/:index", checkUserExits, checkInArray, (req, res) => {
   const { index } = req.params;
   const { name } = req.body;
 
@@ -59,7 +79,7 @@ server.put("/users/:index", (req, res) => {
 });
 
 //*** DELETE ***/
-server.delete("/users/:index", (req, res) => {
+server.delete("/users/:index", checkInArray, (req, res) => {
   const { index } = req.params;
 
   users.splice(index, 1);
